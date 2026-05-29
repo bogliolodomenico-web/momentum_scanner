@@ -245,8 +245,8 @@ st.markdown("""
     #mobile-sidebar-toggle {
         display: none;
         position: fixed;
-        bottom: 24px;
-        right: 20px;
+        top: 12px;
+        right: 12px;
         z-index: 99999;
         width: 54px;
         height: 54px;
