@@ -45,154 +45,6 @@ hide_streamlit_style = """
     <style>
         /* Nasconde il footer "Built with Streamlit" */
         footer {visibility: hidden;}
-
-        /* ========== PULSANTE MOBILE SIDEBAR ========== */
-        #mobile-sidebar-toggle {
-            display: none;
-            position: fixed;
-            bottom: 24px;
-            right: 20px;
-            z-index: 99999;
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #1a5f9e, #2178c4);
-            color: white;
-            font-size: 1.4rem;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        #mobile-sidebar-toggle:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 22px rgba(0,0,0,0.45);
-        }
-
-        /* ========== OVERLAY MOBILE ========== */
-        #mobile-sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 99998;
-        }
-
-        /* ========== PANNELLO SCORREVOLE ========== */
-        #mobile-sidebar-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-height: 82vh;
-            background: white;
-            border-radius: 20px 20px 0 0;
-            z-index: 99999;
-            overflow-y: auto;
-            padding: 0 0 2rem 0;
-            box-shadow: 0 -8px 32px rgba(0,0,0,0.25);
-            transform: translateY(100%);
-            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-        }
-        #mobile-sidebar-panel.open {
-            transform: translateY(0%);
-        }
-        #mobile-sidebar-panel .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.2rem 0.6rem 1.4rem;
-            border-bottom: 1px solid #e0e0e0;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 1;
-        }
-        #mobile-sidebar-panel .panel-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #1a1a1a;
-        }
-        #mobile-sidebar-panel .panel-close {
-            background: #f0f0f0;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #mobile-sidebar-panel .panel-content {
-            padding: 0.8rem 1.2rem 0 1.2rem;
-        }
-
-        /* Mostra il pulsante solo su mobile portrait */
-        @media (max-width: 768px) and (orientation: portrait) {
-            #mobile-sidebar-toggle {
-                display: flex !important;
-            }
-        }
-    </style>
-
-    <!-- Pulsante toggle sidebar mobile -->
-    <button id="mobile-sidebar-toggle" onclick="openMobileSidebar()" title="Apri impostazioni">&#9881;</button>
-
-    <!-- Overlay scuro -->
-    <div id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
-
-    <!-- Pannello scorrevole dal basso -->
-    <div id="mobile-sidebar-panel">
-        <div class="panel-header">
-            <span class="panel-title">&#127897; Impostazioni Scanner</span>
-            <button class="panel-close" onclick="closeMobileSidebar()">&#x2715;</button>
-        </div>
-        <div class="panel-content" id="mobile-sidebar-content">
-        </div>
-    </div>
-
-    <script>
-    function openMobileSidebar() {
-        syncSidebarContent();
-        document.getElementById('mobile-sidebar-overlay').style.display = 'block';
-        document.getElementById('mobile-sidebar-panel').classList.add('open');
-    }
-    function closeMobileSidebar() {
-        document.getElementById('mobile-sidebar-overlay').style.display = 'none';
-        document.getElementById('mobile-sidebar-panel').classList.remove('open');
-    }
-    function syncSidebarContent() {
-        var sidebar = document.querySelector('[data-testid="stSidebar"] > div');
-        var target  = document.getElementById('mobile-sidebar-content');
-        if (sidebar && target) {
-            target.innerHTML = '';
-            var clone = sidebar.cloneNode(true);
-            clone.style.cssText = '';
-            target.appendChild(clone);
-        }
-    }
-    (function() {
-        var startY = 0;
-        document.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
-        }, {passive: true});
-        document.addEventListener('touchend', function(e) {
-            var endY = e.changedTouches[0].clientY;
-            var panel = document.getElementById('mobile-sidebar-panel');
-            if (startY > window.innerHeight * 0.85 && (startY - endY) > 60) {
-                openMobileSidebar();
-            }
-            if (panel.classList.contains('open') && (endY - startY) > 60) {
-                closeMobileSidebar();
-            }
-        }, {passive: true});
-    })();
-    </script>
-
         
         /* Nasconde il pulsante "Deploy" e altri pulsanti della toolbar */
         .stDeployButton {display: none;}
@@ -384,6 +236,108 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# ─────────────────────────────────────────────
+# MOBILE SIDEBAR — pulsante + pannello scorrevole
+# Visibile solo su smartphone in verticale
+# ─────────────────────────────────────────────
+st.markdown("""
+<style>
+    #mobile-sidebar-toggle {
+        display: none;
+        position: fixed;
+        bottom: 24px;
+        right: 20px;
+        z-index: 99999;
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1a5f9e, #2178c4);
+        color: white;
+        font-size: 1.5rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #mobile-sidebar-toggle:active { transform: scale(0.94); }
+    #mobile-sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 99998;
+    }
+    #mobile-sidebar-panel {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        max-height: 82vh;
+        background: white;
+        border-radius: 20px 20px 0 0;
+        z-index: 99999;
+        overflow-y: auto;
+        padding: 0 0 2rem 0;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.25);
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    #mobile-sidebar-panel.open { transform: translateY(0%); }
+    #ms-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.2rem 0.6rem 1.4rem;
+        border-bottom: 1px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+    }
+    #ms-title { font-weight: 700; font-size: 1rem; color: #1a1a1a; }
+    #ms-close {
+        background: #f0f0f0; border: none; border-radius: 50%;
+        width: 32px; height: 32px; font-size: 1rem; cursor: pointer;
+    }
+    #ms-content { padding: 0.8rem 1.2rem 0 1.2rem; }
+    @media (max-width: 768px) and (orientation: portrait) {
+        #mobile-sidebar-toggle { display: flex !important; }
+    }
+</style>
+<button id="mobile-sidebar-toggle" onclick="openMSidebar()" title="Impostazioni">&#9881;</button>
+<div id="mobile-sidebar-overlay" onclick="closeMSidebar()"></div>
+<div id="mobile-sidebar-panel">
+    <div id="ms-header">
+        <span id="ms-title">&#127897; Impostazioni Scanner</span>
+        <button id="ms-close" onclick="closeMSidebar()">&#x2715;</button>
+    </div>
+    <div id="ms-content"></div>
+</div>
+<script>
+function openMSidebar() {
+    var sb = document.querySelector('[data-testid="stSidebar"] section');
+    if (!sb) sb = document.querySelector('[data-testid="stSidebar"]');
+    var tgt = document.getElementById('ms-content');
+    if (sb && tgt) { tgt.innerHTML = ''; tgt.appendChild(sb.cloneNode(true)); }
+    document.getElementById('mobile-sidebar-overlay').style.display = 'block';
+    document.getElementById('mobile-sidebar-panel').classList.add('open');
+}
+function closeMSidebar() {
+    document.getElementById('mobile-sidebar-overlay').style.display = 'none';
+    document.getElementById('mobile-sidebar-panel').classList.remove('open');
+}
+(function(){
+    var y0 = 0;
+    document.addEventListener('touchstart', function(e){ y0 = e.touches[0].clientY; }, {passive:true});
+    document.addEventListener('touchend', function(e){
+        var y1 = e.changedTouches[0].clientY;
+        var p = document.getElementById('mobile-sidebar-panel');
+        if (y0 > window.innerHeight * 0.85 && y0 - y1 > 60) openMSidebar();
+        if (p.classList.contains('open') && y1 - y0 > 60) closeMSidebar();
+    }, {passive:true});
+})();
+</script>
+""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
