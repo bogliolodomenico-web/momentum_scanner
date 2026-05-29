@@ -59,21 +59,15 @@ hide_streamlit_style = """
         /* Nasconde il menu hamburger (tre puntini) */
         #MainMenu {visibility: hidden;}
         
-       /* ========== RIMOZIONE BANDA BIANCA SUPERIORE (Responsive) ========== */
-        /* Nasconde l'header di Streamlit SOLO su schermi grandi (PC/Tablet orizzontale).
-           Su mobile (schermi stretti) lo lascia visibile per il tasto della sidebar. */
-        @media (min-width: 768px) {
-            header[data-testid="stHeader"] {
-                display: none !important;
-            }
+        /* ========== RIMOZIONE COMPLETA BANDA BIANCA SUPERIORE ========== */
+        /* Rimuove il padding e margine predefinito del container principale */
+        .main .block-container {
+            padding-top: 0rem !important;
+            margin-top: 0rem !important;
         }
-        
-        /* Assicura che su mobile l'header sia trasparente e non rovini lo sfondo */
-        @media (max-width: 767px) {
-            header[data-testid="stHeader"] {
-                background-color: transparent !important;
-            }
-        }
+        /* Nasconde l'header di Streamlit (barra vuota) */
+        header[data-testid="stHeader"] {
+            display: none !important;
         }
         /* Forza il primo elemento della pagina a non avere margine superiore */
         .scanner-header {
@@ -240,11 +234,24 @@ hide_streamlit_style = """
         .card-sell [style*="font-family:IBM Plex Mono"] {
             color: #1a1a1a !important;
         }
+        /* Desktop: forza sidebar sempre visibile */
+        @media (min-width: 992px) {
+            [data-testid="stSidebar"] {
+                display: flex !important;
+                visibility: visible !important;
+                transform: none !important;
+                margin-left: 0 !important;
+                width: 21rem !important;
+            }
+            [data-testid="stSidebarContent"] {
+                display: block !important;
+            }
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# ── Pulsante mobile: inietta nel DOM padre tramite iframe ──────────────────
+# ── Pulsante ☰ su mobile: iniettato nel DOM padre ─────────────────────────
 import streamlit.components.v1 as components
 components.html("""
 <script>
@@ -259,7 +266,7 @@ components.html("""
     'color:#fff;font-size:22px;border:none;cursor:pointer;' +
     'box-shadow:0 4px 14px rgba(0,0,0,.4);' +
     'align-items:center;justify-content:center;}' +
-    '@media(max-width:768px) and (orientation:portrait){#_msBtn{display:flex!important;}}';
+    '@media(max-width:991px){#_msBtn{display:flex!important;}}';
   p.head.appendChild(s);
   var b = p.createElement('button');
   b.id = '_msBtn';
