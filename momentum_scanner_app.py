@@ -59,15 +59,21 @@ hide_streamlit_style = """
         /* Nasconde il menu hamburger (tre puntini) */
         #MainMenu {visibility: hidden;}
         
-        /* ========== RIMOZIONE COMPLETA BANDA BIANCA SUPERIORE ========== */
-        /* Rimuove il padding e margine predefinito del container principale */
-        .main .block-container {
-            padding-top: 0rem !important;
-            margin-top: 0rem !important;
+       /* ========== RIMOZIONE BANDA BIANCA SUPERIORE (Responsive) ========== */
+        /* Nasconde l'header di Streamlit SOLO su schermi grandi (PC/Tablet orizzontale).
+           Su mobile (schermi stretti) lo lascia visibile per il tasto della sidebar. */
+        @media (min-width: 768px) {
+            header[data-testid="stHeader"] {
+                display: none !important;
+            }
         }
-        /* Nasconde l'header di Streamlit (barra vuota) */
-        header[data-testid="stHeader"] {
-            display: none !important;
+        
+        /* Assicura che su mobile l'header sia trasparente e non rovini lo sfondo */
+        @media (max-width: 767px) {
+            header[data-testid="stHeader"] {
+                background-color: transparent !important;
+            }
+        }
         }
         /* Forza il primo elemento della pagina a non avere margine superiore */
         .scanner-header {
