@@ -37,7 +37,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CSS PERSONALIZZATO (senza nascondere l'header di Streamlit)
+# CSS PERSONALIZZATO (senza nascondere l'header)
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
@@ -53,10 +53,24 @@ hide_streamlit_style = """
         /* Nasconde la toolbar (Fork, GitHub, ecc.) */
         [data-testid="stToolbar"] {display: none;}
         
-        /* IMPORTANTE: NON nascondiamo l'header, in modo che il menu hamburger sia visibile su mobile */
-        /* header[data-testid="stHeader"] { display: none !important; } */  /* ELIMINATO */
+        /* IMPORTANTE: NON nascondiamo l'header di Streamlit (menu hamburger) */
+        /* Assicuriamo che l'header sia visibile e con altezza adeguata */
+        header[data-testid="stHeader"] {
+            display: flex !important;
+            background: transparent !important;
+            height: auto !important;
+        }
         
-        /* Rimuove il padding superiore in eccesso */
+        /* Il pulsante hamburger (menu) deve essere visibile e grande */
+        button[kind="header"] {
+            background-color: #2c3e50 !important;
+            border-radius: 8px !important;
+            margin: 8px !important;
+            padding: 8px 12px !important;
+            font-size: 1.2rem !important;
+        }
+        
+        /* Rimuove il padding superiore in eccesso per non sovrapporsi */
         .main .block-container {
             padding-top: 0.5rem !important;
             margin-top: 0rem !important;
@@ -205,6 +219,10 @@ hide_streamlit_style = """
             .scanner-header p {
                 font-size: 0.7rem;
             }
+            button[kind="header"] {
+                padding: 6px 10px !important;
+                font-size: 1rem !important;
+            }
         }
     </style>
 """
@@ -272,7 +290,7 @@ def is_market_open() -> tuple[bool, str]:
     return True, f"🟢 APERTO — {now_it.strftime('%H:%M')} CET"
 
 # ─────────────────────────────────────────────
-# FUNZIONI CORE (invariate)
+# FUNZIONI CORE
 # ─────────────────────────────────────────────
 def _add_psar(d: pd.DataFrame) -> pd.DataFrame:
     psar_ind = ta.trend.PSARIndicator(
@@ -514,7 +532,7 @@ st.markdown(
 )
 
 # ─────────────────────────────────────────────
-# SIDEBAR (tutti i controlli)
+# SIDEBAR (controlli)
 # ─────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### 🎛️ Ticker")
