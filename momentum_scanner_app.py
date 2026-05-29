@@ -240,109 +240,85 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # MOBILE SIDEBAR — pulsante + pannello scorrevole
 # Visibile solo su smartphone in verticale
 # ─────────────────────────────────────────────
-st.markdown("""
-<style>
-    #mobile-sidebar-toggle {
-        display: none;
-        position: fixed;
-        top: 12px;
-        right: 12px;
-        z-index: 99999;
-        width: 54px;
-        height: 54px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #1a5f9e, #2178c4);
-        color: white;
-        font-size: 1.5rem;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    #mobile-sidebar-toggle:active { transform: scale(0.94); }
-    #mobile-sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.45);
-        z-index: 99998;
-    }
-    #mobile-sidebar-panel {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        max-height: 82vh;
-        background: white;
-        border-radius: 20px 20px 0 0;
-        z-index: 99999;
-        overflow-y: auto;
-        padding: 0 0 2rem 0;
-        box-shadow: 0 -8px 32px rgba(0,0,0,0.25);
-        transform: translateY(100%);
-        transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-    #mobile-sidebar-panel.open { transform: translateY(0%); }
-    #ms-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 1.2rem 0.6rem 1.4rem;
-        border-bottom: 1px solid #e0e0e0;
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 1;
-    }
-    #ms-title { font-weight: 700; font-size: 1rem; color: #1a1a1a; }
-    #ms-close {
-        background: #f0f0f0; border: none; border-radius: 50%;
-        width: 32px; height: 32px; font-size: 1rem; cursor: pointer;
-    }
-    #ms-content { padding: 0.8rem 1.2rem 0 1.2rem; }
-    /* Su mobile portrait: mostra pulsante toggle */
-    @media (max-width: 768px) and (orientation: portrait) {
-        #mobile-sidebar-toggle { display: flex !important; }
-    }
-    /* Su desktop/tablet: assicura che la sidebar Streamlit sia sempre visibile */
-    @media (min-width: 769px), (orientation: landscape) {
-        [data-testid="stSidebar"] { display: flex !important; visibility: visible !important; }
-    }
-</style>
-<button id="mobile-sidebar-toggle" onclick="openMSidebar()" title="Impostazioni">&#9881;</button>
-<div id="mobile-sidebar-overlay" onclick="closeMSidebar()"></div>
-<div id="mobile-sidebar-panel">
-    <div id="ms-header">
-        <span id="ms-title">&#127897; Impostazioni Scanner</span>
-        <button id="ms-close" onclick="closeMSidebar()">&#x2715;</button>
-    </div>
-    <div id="ms-content"></div>
-</div>
+# Usa components.html: il JS viene eseguito in iframe ma inietta il pulsante nel DOM padre
+import streamlit.components.v1 as components
+components.html("""
+<!DOCTYPE html>
+<html>
+<body style="margin:0;background:transparent;overflow:hidden;">
 <script>
-function openMSidebar() {
-    var sb = document.querySelector('[data-testid="stSidebar"] section');
-    if (!sb) sb = document.querySelector('[data-testid="stSidebar"]');
-    var tgt = document.getElementById('ms-content');
-    if (sb && tgt) { tgt.innerHTML = ''; tgt.appendChild(sb.cloneNode(true)); }
-    document.getElementById('mobile-sidebar-overlay').style.display = 'block';
-    document.getElementById('mobile-sidebar-panel').classList.add('open');
-}
-function closeMSidebar() {
-    document.getElementById('mobile-sidebar-overlay').style.display = 'none';
-    document.getElementById('mobile-sidebar-panel').classList.remove('open');
-}
-(function(){
-    var y0 = 0;
-    document.addEventListener('touchstart', function(e){ y0 = e.touches[0].clientY; }, {passive:true});
-    document.addEventListener('touchend', function(e){
-        var y1 = e.changedTouches[0].clientY;
-        var p = document.getElementById('mobile-sidebar-panel');
-        if (y0 > window.innerHeight * 0.85 && y0 - y1 > 60) openMSidebar();
-        if (p.classList.contains('open') && y1 - y0 > 60) closeMSidebar();
-    }, {passive:true});
+(function() {
+  var pdoc = window.parent.document;
+
+  // Evita duplicati se Streamlit ri-renderizza
+  if (pdoc.getElementById('msSidebarBtn')) return;
+
+  // Inietta CSS nel documento padre
+  var style = pdoc.createElement('style');
+  style.id = 'msSidebarStyle';
+  style.textContent = [
+    '#msSidebarBtn {',
+    '  display: none;',
+    '  position: fixed;',
+    '  top: 12px;',
+    '  right: 12px;',
+    '  z-index: 2147483647;',
+    '  width: 48px;',
+    '  height: 48px;',
+    '  border-radius: 50%;',
+    '  background: linear-gradient(135deg, #1a5f9e, #2178c4);',
+    '  color: white;',
+    '  font-size: 1.5rem;',
+    '  border: none;',
+    '  cursor: pointer;',
+    '  box-shadow: 0 4px 14px rgba(0,0,0,0.4);',
+    '  align-items: center;',
+    '  justify-content: center;',
+    '  line-height: 1;',
+    '}',
+    '@media (max-width: 768px) and (orientation: portrait) {',
+    '  #msSidebarBtn { display: flex !important; }',
+    '}',
+    '@media (min-width: 769px), (orientation: landscape) {',
+    '  [data-testid="stSidebar"] { display: flex !important; visibility: visible !important; }',
+    '}'
+  ].join('\n');
+  pdoc.head.appendChild(style);
+
+  // Crea il pulsante nel documento padre
+  var btn = pdoc.createElement('button');
+  btn.id = 'msSidebarBtn';
+  btn.title = 'Impostazioni';
+  btn.innerHTML = '&#9881;';
+  btn.addEventListener('click', function() {
+    // Clicca il pulsante nativo collapsed-control di Streamlit
+    var ctrl = pdoc.querySelector('[data-testid="collapsedControl"]')
+             || pdoc.querySelector('[data-testid="stSidebarCollapsedControl"]')
+             || pdoc.querySelector('[data-testid="stSidebarContent"] ~ button')
+             || pdoc.querySelector('button[aria-label*="sidebar"], button[aria-label*="Sidebar"]');
+    if (ctrl) {
+      ctrl.click();
+      return;
+    }
+    // Fallback diretto sulla sidebar
+    var sb = pdoc.querySelector('[data-testid="stSidebar"]');
+    if (!sb) return;
+    var tx = window.parent.getComputedStyle(sb).transform;
+    var collapsed = (tx && tx !== 'none' && tx.includes('-')) || sb.style.marginLeft;
+    if (collapsed) {
+      sb.style.transform = 'translateX(0)';
+      sb.style.marginLeft = '0';
+      sb.style.display = 'flex';
+    } else {
+      sb.style.transform = 'translateX(-110%)';
+    }
+  });
+  pdoc.body.appendChild(btn);
 })();
 </script>
-""", unsafe_allow_html=True)
+</body>
+</html>
+""", height=0, scrolling=False)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
