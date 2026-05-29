@@ -30,6 +30,7 @@ st.set_page_config(
     page_title="Momentum Setup Scanner",
     page_icon="📡",
     layout="wide",
+    initial_sidebar_state="expanded",
     menu_items={
         'Get help': None,
         'Report a bug': None,
@@ -236,6 +237,38 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# ── Pulsante ☰ su mobile: iniettato nel DOM padre ─────────────────────────
+import streamlit.components.v1 as components
+components.html("""
+<script>
+(function() {
+  var p = window.parent.document;
+  if (p.getElementById('_msBtn')) return;
+  var s = p.createElement('style');
+  s.textContent =
+    '#_msBtn{display:none;position:fixed;top:12px;right:12px;z-index:2147483647;' +
+    'width:46px;height:46px;border-radius:50%;' +
+    'background:linear-gradient(135deg,#1a5f9e,#2178c4);' +
+    'color:#fff;font-size:22px;border:none;cursor:pointer;' +
+    'box-shadow:0 4px 14px rgba(0,0,0,.4);' +
+    'align-items:center;justify-content:center;}' +
+    '@media(max-width:768px){#_msBtn{display:flex!important;}}';
+  p.head.appendChild(s);
+  var b = p.createElement('button');
+  b.id = '_msBtn';
+  b.title = 'Apri impostazioni';
+  b.innerHTML = '&#9776;';
+  b.onclick = function() {
+    var ctrl = p.querySelector('[data-testid="collapsedControl"]');
+    if (ctrl) { ctrl.click(); return; }
+    var sb = p.querySelector('[data-testid="stSidebar"]');
+    if (sb) { sb.style.transform = 'translateX(0)'; sb.style.display = 'flex'; }
+  };
+  p.body.appendChild(b);
+})();
+</script>
+""", height=0, scrolling=False)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
