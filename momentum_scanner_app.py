@@ -233,92 +233,30 @@ hide_streamlit_style = """
         .card-sell [style*="font-family:IBM Plex Mono"] {
             color: #1a1a1a !important;
         }
+
+        /* ========== MOBILE PORTRAIT: sposta il pulsante nativo >> in alto a destra ========== */
+        @media (max-width: 768px) and (orientation: portrait) {
+            /* Pulsante collapsed sidebar (>>) — spostato in alto a destra */
+            [data-testid="collapsedControl"] {
+                position: fixed !important;
+                top: 10px !important;
+                right: 10px !important;
+                left: auto !important;
+                z-index: 99999 !important;
+                background: linear-gradient(135deg, #1a5f9e, #2178c4) !important;
+                border-radius: 50% !important;
+                width: 48px !important;
+                height: 48px !important;
+                box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+            }
+            [data-testid="collapsedControl"] svg {
+                fill: white !important;
+                color: white !important;
+            }
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-# ─────────────────────────────────────────────
-# MOBILE SIDEBAR — pulsante + pannello scorrevole
-# Visibile solo su smartphone in verticale
-# ─────────────────────────────────────────────
-# Usa components.html: il JS viene eseguito in iframe ma inietta il pulsante nel DOM padre
-import streamlit.components.v1 as components
-components.html("""
-<!DOCTYPE html>
-<html>
-<body style="margin:0;background:transparent;overflow:hidden;">
-<script>
-(function() {
-  var pdoc = window.parent.document;
-
-  // Evita duplicati se Streamlit ri-renderizza
-  if (pdoc.getElementById('msSidebarBtn')) return;
-
-  // Inietta CSS nel documento padre
-  var style = pdoc.createElement('style');
-  style.id = 'msSidebarStyle';
-  style.textContent = [
-    '#msSidebarBtn {',
-    '  display: none;',
-    '  position: fixed;',
-    '  top: 12px;',
-    '  right: 12px;',
-    '  z-index: 2147483647;',
-    '  width: 48px;',
-    '  height: 48px;',
-    '  border-radius: 50%;',
-    '  background: linear-gradient(135deg, #1a5f9e, #2178c4);',
-    '  color: white;',
-    '  font-size: 1.5rem;',
-    '  border: none;',
-    '  cursor: pointer;',
-    '  box-shadow: 0 4px 14px rgba(0,0,0,0.4);',
-    '  align-items: center;',
-    '  justify-content: center;',
-    '  line-height: 1;',
-    '}',
-    '@media (max-width: 768px) and (orientation: portrait) {',
-    '  #msSidebarBtn { display: flex !important; }',
-    '}',
-    '@media (min-width: 769px), (orientation: landscape) {',
-    '  [data-testid="stSidebar"] { display: flex !important; visibility: visible !important; }',
-    '}'
-  ].join('\n');
-  pdoc.head.appendChild(style);
-
-  // Crea il pulsante nel documento padre
-  var btn = pdoc.createElement('button');
-  btn.id = 'msSidebarBtn';
-  btn.title = 'Impostazioni';
-  btn.innerHTML = '&#9881;';
-  btn.addEventListener('click', function() {
-    // Clicca il pulsante nativo collapsed-control di Streamlit
-    var ctrl = pdoc.querySelector('[data-testid="collapsedControl"]')
-             || pdoc.querySelector('[data-testid="stSidebarCollapsedControl"]')
-             || pdoc.querySelector('[data-testid="stSidebarContent"] ~ button')
-             || pdoc.querySelector('button[aria-label*="sidebar"], button[aria-label*="Sidebar"]');
-    if (ctrl) {
-      ctrl.click();
-      return;
-    }
-    // Fallback diretto sulla sidebar
-    var sb = pdoc.querySelector('[data-testid="stSidebar"]');
-    if (!sb) return;
-    var tx = window.parent.getComputedStyle(sb).transform;
-    var collapsed = (tx && tx !== 'none' && tx.includes('-')) || sb.style.marginLeft;
-    if (collapsed) {
-      sb.style.transform = 'translateX(0)';
-      sb.style.marginLeft = '0';
-      sb.style.display = 'flex';
-    } else {
-      sb.style.transform = 'translateX(-110%)';
-    }
-  });
-  pdoc.body.appendChild(btn);
-})();
-</script>
-</body>
-</html>
-""", height=0, scrolling=False)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
