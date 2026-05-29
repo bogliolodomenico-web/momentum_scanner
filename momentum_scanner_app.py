@@ -233,25 +233,14 @@ hide_streamlit_style = """
         .card-sell [style*="font-family:IBM Plex Mono"] {
             color: #1a1a1a !important;
         }
-
-        /* ========== MOBILE PORTRAIT: sposta il pulsante nativo >> in alto a destra ========== */
+        /* SOLO mobile verticale: sposta il pulsante >> nativo di Streamlit */
         @media (max-width: 768px) and (orientation: portrait) {
-            /* Pulsante collapsed sidebar (>>) — spostato in alto a destra */
             [data-testid="collapsedControl"] {
                 position: fixed !important;
                 top: 10px !important;
                 right: 10px !important;
                 left: auto !important;
                 z-index: 99999 !important;
-                background: linear-gradient(135deg, #1a5f9e, #2178c4) !important;
-                border-radius: 50% !important;
-                width: 48px !important;
-                height: 48px !important;
-                box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
-            }
-            [data-testid="collapsedControl"] svg {
-                fill: white !important;
-                color: white !important;
             }
         }
     </style>
