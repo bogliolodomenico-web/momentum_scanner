@@ -37,7 +37,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CSS PERSONALIZZATO (senza nascondere l'header nativo)
+# CSS PERSONALIZZATO (senza nascondere l'header di Streamlit)
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
@@ -53,8 +53,8 @@ hide_streamlit_style = """
         /* Nasconde la toolbar (Fork, GitHub, ecc.) */
         [data-testid="stToolbar"] {display: none;}
         
-        /* NON nascondiamo l'header di Streamlit (per mantenere il menu hamburger) */
-        /* header[data-testid="stHeader"] { display: none !important; } */  /* RIMOSSO */
+        /* IMPORTANTE: NON nascondiamo l'header, in modo che il menu hamburger sia visibile su mobile */
+        /* header[data-testid="stHeader"] { display: none !important; } */  /* ELIMINATO */
         
         /* Rimuove il padding superiore in eccesso */
         .main .block-container {
@@ -177,7 +177,7 @@ hide_streamlit_style = """
             color: white;
         }
         
-        /* Intestazione personalizzata (senza sfondo fisso) */
+        /* Intestazione personalizzata */
         .scanner-header {
             background: #f5f5dc;
             border: 1px solid #c0a080;
@@ -197,54 +197,18 @@ hide_streamlit_style = """
             font-size: 0.85rem;
         }
         
-        /* Pulsante menu personalizzato */
-        .custom-menu-btn {
-            background-color: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 16px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-right: 15px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .custom-menu-btn:hover {
-            background-color: #1e2b38;
-            transform: scale(1.02);
-        }
+        /* Responsive per mobile */
         @media (max-width: 768px) {
-            .custom-menu-btn {
-                padding: 6px 12px;
-                font-size: 0.9rem;
-            }
             .scanner-header h1 {
                 font-size: 1.2rem;
+            }
+            .scanner-header p {
+                font-size: 0.7rem;
             }
         }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# PULSANTE PERSONALIZZATO PER APRIRE LA SIDEBAR (con JavaScript)
-# ─────────────────────────────────────────────
-st.markdown("""
-<script>
-function toggleSidebar() {
-    const sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
-    if (sidebar) {
-        const isOpen = sidebar.style.transform !== 'translateX(-100%)';
-        sidebar.style.transform = isOpen ? 'translateX(-100%)' : 'translateX(0%)';
-    }
-}
-window.toggleSidebar = toggleSidebar;
-</script>
-""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
@@ -534,33 +498,20 @@ if "last_params" not in st.session_state:
     st.session_state["last_params"] = {}
 
 # ─────────────────────────────────────────────
-# HEADER CON PULSANTE MENU (prima del titolo)
+# HEADER
 # ─────────────────────────────────────────────
 mkt_open, mkt_label = is_market_open()
 mkt_cls = "market-open" if mkt_open else "market-closed"
 
-# Creiamo due colonne: una stretta per il pulsante, una per il titolo
-col1, col2 = st.columns([0.7, 9.3])
-with col1:
-    # Pulsante personalizzato che richiama JavaScript per aprire/chiudere la sidebar
-    st.markdown(
-        """
-        <button class="custom-menu-btn" onclick="parent.window.toggleSidebar();">
-            ☰ MENU
-        </button>
-        """,
-        unsafe_allow_html=True
-    )
-with col2:
-    st.markdown(
-        f'<div class="scanner-header" style="margin-top:0;">'
-        f'<h1>📡 MOMENTUM SETUP SCANNER</h1>'
-        f'<p>Basato su regime_classifier v3.6.1 &nbsp;·&nbsp; '
-        f'EMA + TrendScore + MACD/RSI/Stoch/Volume + PSAR &nbsp;·&nbsp; '
-        f'<span class="{mkt_cls}">{mkt_label}</span></p>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
+st.markdown(
+    f'<div class="scanner-header">'
+    f'<h1>📡 MOMENTUM SETUP SCANNER</h1>'
+    f'<p>Basato su regime_classifier v3.6.1 &nbsp;·&nbsp; '
+    f'EMA + TrendScore + MACD/RSI/Stoch/Volume + PSAR &nbsp;·&nbsp; '
+    f'<span class="{mkt_cls}">{mkt_label}</span></p>'
+    f'</div>',
+    unsafe_allow_html=True
+)
 
 # ─────────────────────────────────────────────
 # SIDEBAR (tutti i controlli)
