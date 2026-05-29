@@ -16,9 +16,8 @@ from datetime import datetime
 import pytz
 import json
 import os
-
-
 from datetime import timedelta
+
 start_date = (datetime.now() - timedelta(days=400)).strftime("%Y-%m-%d")
 
 warnings.filterwarnings("ignore")
@@ -39,7 +38,7 @@ st.set_page_config(
 
 # ─────────────────────────────────────────────
 # CSS per nascondere elementi superflui di Streamlit
-# e per personalizzare sfondo, pulsanti e card
+# MA MANTENENDO VISIBILE IL PULSANTE SIDEBAR (hamburger)
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
@@ -55,10 +54,9 @@ hide_streamlit_style = """
         /* Nasconde la toolbar (Fork, GitHub, ecc.) */
         [data-testid="stToolbar"] {display: none;}
         
-        /* Nasconde il menu hamburger (tre puntini) */
-        #MainMenu {visibility: hidden;}
+        /* ⚠️ NON nascondiamo #MainMenu perché su mobile controlla la sidebar */
+        /* #MainMenu {visibility: hidden;} */  /* RIGA COMMENTATA/ELIMINATA */
         
-        /* ========== RIMOZIONE COMPLETA BANDA BIANCA SUPERIORE ========== */
         /* Rimuove il padding e margine predefinito del container principale */
         .main .block-container {
             padding-top: 0rem !important;
@@ -71,19 +69,16 @@ hide_streamlit_style = """
         /* Forza il primo elemento della pagina a non avere margine superiore */
         .scanner-header {
             margin-top: 0rem !important;
-            padding-top: 1rem !important;  /* mantiene un po' di spazio interno */
+            padding-top: 1rem !important;
         }
-        /* Rimuove eventuale spazio aggiunto dal body */
         body {
             margin: 0 !important;
             padding: 0 !important;
         }
-        /* Assicura che l'app parta da 0 */
         .stApp {
             margin-top: 0rem !important;
             padding-top: 0rem !important;
         }
-        /* Elimina spazi residui in cima a qualsiasi elemento */
         .element-container, .stMarkdown, .stVerticalBlock {
             margin-top: 0 !important;
         }
@@ -97,7 +92,6 @@ hide_streamlit_style = """
         }
         
         /* ========== PULSANTI EVIDENZIATI ========== */
-        /* Pulsante ANALIZZA SEGNALI (colore rosso tenue) */
         .stButton > button {
             background: linear-gradient(135deg, #c96a6a, #b04e4e) !important;
             color: white !important;
@@ -127,7 +121,7 @@ hide_streamlit_style = """
             box-shadow: 0 4px 12px rgba(35,134,54,0.5) !important;
         }
         
-        /* ========== CARD BUY (sfondo chiaro verde) ========== */
+        /* ========== CARD ========== */
         .card-buy {
             background: linear-gradient(135deg, #e6f4ea 0%, #d0ebd6 100%);
             border: 2px solid #238636 !important;
@@ -141,8 +135,6 @@ hide_streamlit_style = """
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(35,134,54,0.4);
         }
-        
-        /* ========== CARD SELL (sfondo chiaro rosso) ========== */
         .card-sell {
             background: linear-gradient(135deg, #fce8e6 0%, #f8d7d5 100%);
             border: 2px solid #da3633 !important;
@@ -156,8 +148,6 @@ hide_streamlit_style = """
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(218,54,51,0.3);
         }
-        
-        /* CARD per titoli illiquidi (ambrato) */
         .card-illiquid {
             background: linear-gradient(135deg, #fff3e0 0%, #ffe6b3 100%);
             border: 2px solid #d29922 !important;
@@ -165,8 +155,6 @@ hide_streamlit_style = """
             padding: 1.2rem 1.4rem;
             margin-bottom: 0.8rem;
         }
-        
-        /* Classe aggiuntiva per cambio stato (bordo pulsante blu) */
         .card-changed {
             animation: pulse-blue 1s ease-in-out;
             border-width: 3px !important;
@@ -177,7 +165,7 @@ hide_streamlit_style = """
             100% { border-color: #1f6feb; box-shadow: 0 0 0 0 rgba(31,111,235,0); }
         }
         
-        /* Migliora leggibilità testo nelle card */
+        /* Testi */
         .ticker-name {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 1.2rem;
@@ -209,7 +197,7 @@ hide_streamlit_style = """
             color: white;
         }
         
-        /* Riquadro header (avorio) */
+        /* Header */
         .scanner-header {
             background: #f5f5dc;
             border: 1px solid #c0a080;
@@ -225,17 +213,55 @@ hide_streamlit_style = """
             color: #5a4a3a;
         }
         
-        /* Testo prezzi su sfondo chiaro */
-        .card-buy .ticker-name, .card-sell .ticker-name {
-            color: #1a1a1a;
+        /* ========== MIGLIORIE SIDEBAR PER MOBILE ========== */
+        /* Il pulsante di apertura sidebar (hamburger) diventa più grande e visibile */
+        button[kind="header"] {
+            background-color: #2c3e50 !important;
+            border-radius: 8px !important;
+            margin: 8px !important;
+            padding: 8px 12px !important;
         }
-        .card-buy [style*="font-family:IBM Plex Mono"], 
-        .card-sell [style*="font-family:IBM Plex Mono"] {
-            color: #1a1a1a !important;
+        /* Area di tocco della sidebar (swipe) mantenuta attiva */
+        [data-testid="stSidebar"] {
+            width: 85vw !important;
         }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────
+# PULSANTE FLOTTANTE PER APRIRE SIDEBAR SU MOBILE (OPZIONALE)
+# ─────────────────────────────────────────────
+st.markdown("""
+<script>
+    // Crea un pulsante flottante per aprire la sidebar su mobile (schermi <= 768px)
+    if (window.innerWidth <= 768) {
+        const btn = document.createElement('button');
+        btn.innerHTML = '☰ MENU';
+        btn.style.position = 'fixed';
+        btn.style.bottom = '20px';
+        btn.style.right = '20px';
+        btn.style.zIndex = '999';
+        btn.style.backgroundColor = '#2c3e50';
+        btn.style.color = 'white';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '50px';
+        btn.style.padding = '12px 18px';
+        btn.style.fontSize = '16px';
+        btn.style.fontWeight = 'bold';
+        btn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        btn.style.cursor = 'pointer';
+        btn.onclick = () => {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar) {
+                const isOpen = sidebar.style.transform !== 'translateX(-100%)';
+                sidebar.style.transform = isOpen ? 'translateX(-100%)' : 'translateX(0%)';
+            }
+        };
+        document.body.appendChild(btn);
+    }
+</script>
+""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
@@ -817,7 +843,7 @@ with col_r:
                            data, changed=(ticker in changed_tickers))
 
 # ─────────────────────────────────────────────
-# FOOTER (opzionale, visibile solo se non nascosto)
+# FOOTER
 # ─────────────────────────────────────────────
 st.divider()
 st.markdown(
@@ -829,7 +855,7 @@ st.markdown(
 )
 
 # ─────────────────────────────────────────────
-# AUTO-REFRESH (in fondo per non bloccare il rendering)
+# AUTO-REFRESH
 # ─────────────────────────────────────────────
 if auto_refresh:
     time.sleep(refresh_mins * 60)
