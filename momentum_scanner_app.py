@@ -238,12 +238,29 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# ── Pulsante ☰ su mobile: iniettato nel DOM padre ─────────────────────────
 import streamlit.components.v1 as components
 components.html("""
 <script>
 (function() {
   var p = window.parent.document;
+
+  // ── Auto-apri sidebar se collassata (fix Firefox/localStorage) ──
+  function tryOpenSidebar() {
+    var ctrl = p.querySelector('[data-testid="collapsedControl"]');
+    if (ctrl) {
+      ctrl.click();
+      return true;
+    }
+    return false;
+  }
+  // Aspetta che Streamlit abbia renderizzato il DOM, poi apre la sidebar
+  var attempts = 0;
+  var timer = setInterval(function() {
+    attempts++;
+    if (tryOpenSidebar() || attempts > 20) clearInterval(timer);
+  }, 300);
+
+  // ── Pulsante ☰ solo su mobile ──────────────────────────────────
   if (p.getElementById('_msBtn')) return;
   var s = p.createElement('style');
   s.textContent =
