@@ -300,8 +300,13 @@ st.markdown("""
         width: 32px; height: 32px; font-size: 1rem; cursor: pointer;
     }
     #ms-content { padding: 0.8rem 1.2rem 0 1.2rem; }
+    /* Su mobile portrait: mostra pulsante toggle */
     @media (max-width: 768px) and (orientation: portrait) {
         #mobile-sidebar-toggle { display: flex !important; }
+    }
+    /* Su desktop/tablet: assicura che la sidebar Streamlit sia sempre visibile */
+    @media (min-width: 769px), (orientation: landscape) {
+        [data-testid="stSidebar"] { display: flex !important; visibility: visible !important; }
     }
 </style>
 <button id="mobile-sidebar-toggle" onclick="openMSidebar()" title="Impostazioni">&#9881;</button>
