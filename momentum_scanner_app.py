@@ -1,6 +1,6 @@
 """
 MOMENTUM SETUP SCANNER — App Streamlit Integrata
-Basata su regime_classifier_v3.6.1
+Basata su regime_classifier v3.6.1
 Parametri fissi (pre-ottimizzati) — nessuna WFO ad ogni avvio.
 Avvio: streamlit run momentum_scanner_app.py
 """
@@ -29,7 +29,7 @@ st.set_page_config(
     page_title="Momentum Setup Scanner",
     page_icon="📡",
     layout="wide",
-    initial_sidebar_state="expanded",  # default espansa, poi JS la modifica su mobile
+    initial_sidebar_state="expanded",
     menu_items={
         'Get help': None,
         'Report a bug': None,
@@ -238,11 +238,9 @@ hide_streamlit_style = """
         
         /* ========== DESKTOP (>768px): rimuove il pulsante di chiusura « ========== */
         @media (min-width: 769px) {
-            /* Nasconde il pulsante di chiusura della sidebar (freccia) */
             [data-testid="stSidebar"] button[kind="header"] {
                 display: none !important;
             }
-            /* Impedisce che la sidebar venga chiusa tramite click esterno (opzionale) */
             [data-testid="stSidebar"] {
                 transform: translateX(0) !important;
             }
@@ -252,34 +250,28 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# JAVASCRIPT: gestione dinamica della sidebar su mobile/desktop
+# JAVASCRIPT: chiude sidebar su mobile all'avvio
 # ─────────────────────────────────────────────
 import streamlit.components.v1 as components
 components.html("""
 <script>
 (function() {
-    var isMobile = window.innerWidth <= 768;
-    var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
-    if (!sidebar) return;
-    
-    if (isMobile) {
-        // Su mobile: forza sidebar chiusa all'avvio (così compare l'hamburger)
-        sidebar.style.transform = 'translateX(-100%)';
-        sidebar.style.display = 'flex';
-        // Rimuove eventuale stile inline che la forza aperta
-        setTimeout(function() {
-            if (sidebar.style.transform !== 'translateX(-100%)') {
-                sidebar.style.transform = 'translateX(-100%)';
-            }
-        }, 100);
-    } else {
-        // Su desktop: forza sidebar sempre aperta e rimuove la possibilità di chiuderla
-        sidebar.style.transform = 'translateX(0)';
-        sidebar.style.display = 'flex';
-        // Nasconde il pulsante di chiusura (già fatto dal CSS, ma per sicurezza)
-        var closeBtn = sidebar.querySelector('button[kind="header"]');
-        if (closeBtn) closeBtn.style.display = 'none';
+    function adjust() {
+        var isMobile = window.innerWidth <= 768;
+        var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
+        if (!sidebar) return;
+        if (isMobile) {
+            // Forza sidebar chiusa all'avvio
+            sidebar.style.transform = 'translateX(-100%)';
+            sidebar.style.display = 'flex';
+        } else {
+            sidebar.style.transform = 'translateX(0)';
+            sidebar.style.display = 'flex';
+        }
     }
+    adjust();
+    setTimeout(adjust, 200);
+    window.addEventListener('resize', adjust);
 })();
 </script>
 """, height=0)
