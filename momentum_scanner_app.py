@@ -216,8 +216,17 @@ hide_streamlit_style = """
         .card-sell [style*="font-family:IBM Plex Mono"] { color: #1a1a1a !important; }
 
         /* ========== PULSANTE FILTRI FISSO IN ALTO A DESTRA ========== */
-        div[data-testid="stFixedSidebarToggle"] > div > button,
-        .filtri-toggle-btn > button {
+        /* Contenitore fixed per il pulsante Streamlit */
+        .filtri-toggle-btn {
+            position: fixed !important;
+            top: 10px !important;
+            right: 16px !important;
+            z-index: 9999999 !important;
+        }
+        .filtri-toggle-btn > div {
+            position: static !important;
+        }
+        .filtri-toggle-btn button {
             background: #f5f5dc !important;
             color: #3a2a1f !important;
             border: 2px solid #c0a080 !important;
@@ -228,16 +237,6 @@ hide_streamlit_style = """
             font-family: 'DM Sans', sans-serif !important;
             cursor: pointer !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-        }
-        /* Contenitore fixed per il pulsante Streamlit */
-        .filtri-toggle-btn {
-            position: fixed !important;
-            top: 10px !important;
-            right: 16px !important;
-            z-index: 999999 !important;
-        }
-        .filtri-toggle-btn > div {
-            position: static !important;
         }
         /* Su mobile: espande il contenuto principale quando la sidebar è chiusa */
         @media (max-width: 768px) {
@@ -539,6 +538,9 @@ st.markdown(
 # ─────────────────────────────────────────────
 # SIDEBAR — visibilità cross-device
 # ─────────────────────────────────────────────
+_sidebar_open = st.session_state["sidebar_open"]
+_btn_left = "calc(21rem + 12px)" if _sidebar_open else "16px"
+
 _sidebar_css = """
     <style>
         section[data-testid="stSidebar"] {{
@@ -564,8 +566,17 @@ _sidebar_css = """
             background: #f0f2f6 !important;
         }}
         [data-testid="collapsedControl"] {{ display: none !important; }}
+        /* Sposta il pulsante a destra della sidebar quando è aperta */
+        .filtri-toggle-btn {{
+            left: {btn_left} !important;
+            right: auto !important;
+            transition: left 0.3s ease !important;
+        }}
     </style>
-""".format(display="flex" if st.session_state["sidebar_open"] else "none")
+""".format(
+    display="flex" if _sidebar_open else "none",
+    btn_left=_btn_left
+)
 st.markdown(_sidebar_css, unsafe_allow_html=True)
 
 with st.sidebar:
