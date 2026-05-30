@@ -29,7 +29,7 @@ st.set_page_config(
     page_title="Momentum Setup Scanner",
     page_icon="📡",
     layout="wide",
-    initial_sidebar_state="expanded",  # su desktop sidebar già visibile
+    initial_sidebar_state="expanded",  # default espansa, poi JS la modifica su mobile
     menu_items={
         'Get help': None,
         'Report a bug': None,
@@ -38,7 +38,7 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CSS PERSONALIZZATO (mantiene l'hamburger nativo)
+# CSS PERSONALIZZATO
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
@@ -205,7 +205,7 @@ hide_streamlit_style = """
             font-size: 0.75rem;
         }
         
-        /* ========== MOBILE: sidebar con sfondo solido ========== */
+        /* ========== MOBILE (max 768px) ========== */
         @media (max-width: 768px) {
             /* Sidebar con sfondo solido e larghezza adeguata */
             [data-testid="stSidebar"] {
@@ -235,9 +235,54 @@ hide_streamlit_style = """
                 font-size: 0.9rem !important;
             }
         }
+        
+        /* ========== DESKTOP (>768px): rimuove il pulsante di chiusura « ========== */
+        @media (min-width: 769px) {
+            /* Nasconde il pulsante di chiusura della sidebar (freccia) */
+            [data-testid="stSidebar"] button[kind="header"] {
+                display: none !important;
+            }
+            /* Impedisce che la sidebar venga chiusa tramite click esterno (opzionale) */
+            [data-testid="stSidebar"] {
+                transform: translateX(0) !important;
+            }
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────
+# JAVASCRIPT: gestione dinamica della sidebar su mobile/desktop
+# ─────────────────────────────────────────────
+import streamlit.components.v1 as components
+components.html("""
+<script>
+(function() {
+    var isMobile = window.innerWidth <= 768;
+    var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
+    if (!sidebar) return;
+    
+    if (isMobile) {
+        // Su mobile: forza sidebar chiusa all'avvio (così compare l'hamburger)
+        sidebar.style.transform = 'translateX(-100%)';
+        sidebar.style.display = 'flex';
+        // Rimuove eventuale stile inline che la forza aperta
+        setTimeout(function() {
+            if (sidebar.style.transform !== 'translateX(-100%)') {
+                sidebar.style.transform = 'translateX(-100%)';
+            }
+        }, 100);
+    } else {
+        // Su desktop: forza sidebar sempre aperta e rimuove la possibilità di chiuderla
+        sidebar.style.transform = 'translateX(0)';
+        sidebar.style.display = 'flex';
+        // Nasconde il pulsante di chiusura (già fatto dal CSS, ma per sicurezza)
+        var closeBtn = sidebar.querySelector('button[kind="header"]');
+        if (closeBtn) closeBtn.style.display = 'none';
+    }
+})();
+</script>
+""", height=0)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
