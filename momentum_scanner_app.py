@@ -38,29 +38,25 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CSS PERSONALIZZATO (senza nascondere il menu hamburger)
+# CSS PERSONALIZZATO (mantiene header nativo)
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
-        /* Nasconde il footer "Built with Streamlit" */
+        /* Nasconde il footer */
         footer {visibility: hidden;}
         
-        /* Nasconde il pulsante "Deploy" e altri pulsanti della toolbar */
+        /* Nasconde pulsanti superflui */
         .stDeployButton {display: none;}
-        
-        /* Nasconde la barra decorativa rossa superiore */
         [data-testid="stDecoration"] {display: none;}
-        
-        /* Nasconde la toolbar (Fork, GitHub, ecc.) */
         [data-testid="stToolbar"] {display: none;}
         
-        /* IMPORTANTE: NON nascondere l'header (menu hamburger) */
+        /* Header trasparente ma visibile (per hamburger nativo) */
         header[data-testid="stHeader"] {
             background: transparent !important;
             height: auto !important;
         }
         
-        /* Pulsante hamburger più grande e visibile su mobile */
+        /* Pulsante hamburger nativo migliorato */
         button[kind="header"] {
             background-color: #2c3e50 !important;
             border-radius: 8px !important;
@@ -69,13 +65,13 @@ hide_streamlit_style = """
             font-size: 1.2rem !important;
         }
         
-        /* Rimuove il padding superiore in eccesso */
+        /* Rimuove padding superiore in eccesso */
         .main .block-container {
             padding-top: 0.5rem !important;
             margin-top: 0rem !important;
         }
         
-        /* Sfondo personalizzato */
+        /* Sfondo principale */
         .stApp {
             background: #87CEEB;
         }
@@ -195,39 +191,48 @@ hide_streamlit_style = """
             background: #f5f5dc;
             border: 1px solid #c0a080;
             border-radius: 16px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .scanner-header h1 {
             color: #3a2a1f;
             margin: 0;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
         }
         .scanner-header p {
             color: #5a4a3a;
-            margin: 0.3rem 0 0 0;
-            font-size: 0.85rem;
+            margin: 0.2rem 0 0 0;
+            font-size: 0.75rem;
         }
         
-        /* ========== ADATTAMENTO MOBILE ========== */
+        /* ========== STILE SIDEBAR PER MOBILE (SFONDO SOLIDO) ========== */
         @media (max-width: 768px) {
-            /* Sidebar più larga e ben visibile */
+            /* Sidebar con sfondo solido e larghezza adeguata */
             [data-testid="stSidebar"] {
+                background-color: #f5f5dc !important;
                 width: 85vw !important;
                 z-index: 1000 !important;
+                box-shadow: 2px 0 12px rgba(0,0,0,0.3) !important;
             }
-            /* Riduce dimensione titolo */
+            [data-testid="stSidebar"] > div:first-child {
+                background-color: #f5f5dc !important;
+            }
+            /* Testi nella sidebar ben visibili */
+            .sidebar .stMarkdown, .sidebar .stSelectbox, .sidebar .stRadio, .sidebar .stSlider, .sidebar .stNumberInput {
+                color: #1a1a1a !important;
+            }
+            /* Riduce dimensione titolo header principale */
             .scanner-header h1 {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             .scanner-header p {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
-            /* Pulsante hamburger più compatto ma ancora tappabile */
+            /* Pulsante hamburger nativo più compatto */
             button[kind="header"] {
-                padding: 6px 10px !important;
-                font-size: 1rem !important;
+                padding: 4px 8px !important;
+                font-size: 0.9rem !important;
             }
         }
     </style>
@@ -235,57 +240,52 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
-# PULSANTE FLOTTANTE PER APRIRE LA SIDEBAR (SOLO MOBILE)
+# PULSANTE APERTURA SIDEBAR (POSIZIONE IN ALTO A DESTRA, SOLO MOBILE)
 # ─────────────────────────────────────────────
 import streamlit.components.v1 as components
 components.html("""
 <script>
 (function() {
-    // Crea pulsante solo se non esiste già
-    if (parent.document.getElementById('mobile-sidebar-opener')) return;
+    if (parent.document.getElementById('mobile-menu-btn')) return;
     
     var btn = parent.document.createElement('button');
-    btn.id = 'mobile-sidebar-opener';
-    btn.innerHTML = '☰';
+    btn.id = 'mobile-menu-btn';
+    btn.innerHTML = '☰ MENU';
     btn.style.position = 'fixed';
-    btn.style.bottom = '20px';
-    btn.style.right = '20px';
-    btn.style.width = '56px';
-    btn.style.height = '56px';
-    btn.style.borderRadius = '50%';
+    btn.style.top = '10px';
+    btn.style.right = '10px';
+    btn.style.zIndex = '9999';
     btn.style.backgroundColor = '#2c3e50';
     btn.style.color = 'white';
     btn.style.border = 'none';
-    btn.style.fontSize = '24px';
+    btn.style.borderRadius = '30px';
+    btn.style.padding = '8px 16px';
+    btn.style.fontSize = '14px';
+    btn.style.fontWeight = 'bold';
     btn.style.cursor = 'pointer';
-    btn.style.zIndex = '10000';
-    btn.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-    btn.style.display = 'none'; // inizialmente nascosto, mostrato solo su mobile via media query
+    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+    btn.style.display = 'none'; // inizialmente nascosto, visibile solo su mobile
     btn.onclick = function() {
         var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
         if (sidebar) {
-            // Forza l'apertura della sidebar
+            // Forza l'apertura della sidebar con stile corretto
             sidebar.style.transform = 'translateX(0)';
             sidebar.style.display = 'flex';
-            // Simula anche il click sul pulsante hamburger (se presente)
-            var hamburger = parent.document.querySelector('button[kind="header"]');
-            if (hamburger && sidebar.style.transform === 'translateX(0)') {
-                // Non necessario, ma per sicurezza
-            }
+            sidebar.style.visibility = 'visible';
+            // Se esiste il pulsante di chiusura nativo, non interferiamo
         }
     };
     parent.document.body.appendChild(btn);
     
-    // Mostra il pulsante solo su schermi piccoli (max 768px)
-    function checkWidth() {
+    function checkMobile() {
         if (parent.innerWidth <= 768) {
-            btn.style.display = 'flex';
+            btn.style.display = 'block';
         } else {
             btn.style.display = 'none';
         }
     }
-    checkWidth();
-    parent.addEventListener('resize', checkWidth);
+    checkMobile();
+    parent.addEventListener('resize', checkMobile);
 })();
 </script>
 """, height=0)
