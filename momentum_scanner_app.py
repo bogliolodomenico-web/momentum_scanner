@@ -38,34 +38,33 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────
-# CSS PERSONALIZZATO (mantiene header nativo)
+# CSS PERSONALIZZATO (mantiene l'hamburger nativo)
 # ─────────────────────────────────────────────
 hide_streamlit_style = """
     <style>
-        /* Nasconde il footer */
+        /* Nasconde footer e pulsanti superflui */
         footer {visibility: hidden;}
-        
-        /* Nasconde pulsanti superflui */
         .stDeployButton {display: none;}
         [data-testid="stDecoration"] {display: none;}
         [data-testid="stToolbar"] {display: none;}
         
-        /* Header trasparente ma visibile (per hamburger nativo) */
+        /* Header trasparente ma mantenuto visibile (hamburger incluso) */
         header[data-testid="stHeader"] {
             background: transparent !important;
             height: auto !important;
         }
         
-        /* Pulsante hamburger nativo migliorato */
+        /* Pulsante hamburger più grande e tappabile su mobile */
         button[kind="header"] {
             background-color: #2c3e50 !important;
             border-radius: 8px !important;
             margin: 8px !important;
             padding: 8px 12px !important;
             font-size: 1.2rem !important;
+            cursor: pointer !important;
         }
         
-        /* Rimuove padding superiore in eccesso */
+        /* Rimuove padding extra in cima */
         .main .block-container {
             padding-top: 0.5rem !important;
             margin-top: 0rem !important;
@@ -206,7 +205,7 @@ hide_streamlit_style = """
             font-size: 0.75rem;
         }
         
-        /* ========== STILE SIDEBAR PER MOBILE (SFONDO SOLIDO) ========== */
+        /* ========== MOBILE: sidebar con sfondo solido ========== */
         @media (max-width: 768px) {
             /* Sidebar con sfondo solido e larghezza adeguata */
             [data-testid="stSidebar"] {
@@ -218,18 +217,19 @@ hide_streamlit_style = """
             [data-testid="stSidebar"] > div:first-child {
                 background-color: #f5f5dc !important;
             }
-            /* Testi nella sidebar ben visibili */
-            .sidebar .stMarkdown, .sidebar .stSelectbox, .sidebar .stRadio, .sidebar .stSlider, .sidebar .stNumberInput {
+            /* Testi sidebar ben visibili */
+            .sidebar .stMarkdown, .sidebar .stSelectbox, .sidebar .stRadio, 
+            .sidebar .stSlider, .sidebar .stNumberInput {
                 color: #1a1a1a !important;
             }
-            /* Riduce dimensione titolo header principale */
+            /* Header principale più compatto */
             .scanner-header h1 {
                 font-size: 1.1rem;
             }
             .scanner-header p {
                 font-size: 0.65rem;
             }
-            /* Pulsante hamburger nativo più compatto */
+            /* Hamburger più compatto ma ancora tappabile */
             button[kind="header"] {
                 padding: 4px 8px !important;
                 font-size: 0.9rem !important;
@@ -238,57 +238,6 @@ hide_streamlit_style = """
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
-# PULSANTE APERTURA SIDEBAR (POSIZIONE IN ALTO A DESTRA, SOLO MOBILE)
-# ─────────────────────────────────────────────
-import streamlit.components.v1 as components
-components.html("""
-<script>
-(function() {
-    if (parent.document.getElementById('mobile-menu-btn')) return;
-    
-    var btn = parent.document.createElement('button');
-    btn.id = 'mobile-menu-btn';
-    btn.innerHTML = '☰ MENU';
-    btn.style.position = 'fixed';
-    btn.style.top = '10px';
-    btn.style.right = '10px';
-    btn.style.zIndex = '9999';
-    btn.style.backgroundColor = '#2c3e50';
-    btn.style.color = 'white';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '30px';
-    btn.style.padding = '8px 16px';
-    btn.style.fontSize = '14px';
-    btn.style.fontWeight = 'bold';
-    btn.style.cursor = 'pointer';
-    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-    btn.style.display = 'none'; // inizialmente nascosto, visibile solo su mobile
-    btn.onclick = function() {
-        var sidebar = parent.document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            // Forza l'apertura della sidebar con stile corretto
-            sidebar.style.transform = 'translateX(0)';
-            sidebar.style.display = 'flex';
-            sidebar.style.visibility = 'visible';
-            // Se esiste il pulsante di chiusura nativo, non interferiamo
-        }
-    };
-    parent.document.body.appendChild(btn);
-    
-    function checkMobile() {
-        if (parent.innerWidth <= 768) {
-            btn.style.display = 'block';
-        } else {
-            btn.style.display = 'none';
-        }
-    }
-    checkMobile();
-    parent.addEventListener('resize', checkMobile);
-})();
-</script>
-""", height=0)
 
 # ─────────────────────────────────────────────
 # CARICAMENTO TICKER DA FILE JSON
