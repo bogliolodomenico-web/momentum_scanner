@@ -522,13 +522,14 @@ mkt_open, mkt_label = is_market_open()
 mkt_cls = "market-open" if mkt_open else "market-closed"
 
 # ─────────────────────────────────────────────
-# PULSANTE FISSO "FILTRI E OPZIONI" (in alto a destra)
+# PULSANTE "FILTRI" — visibile solo quando sidebar chiusa
 # ─────────────────────────────────────────────
-st.markdown('<div class="filtri-toggle-btn">', unsafe_allow_html=True)
-if st.button("☰ Filtri e Opzioni", key="sidebar_toggle"):
-    st.session_state["sidebar_open"] = not st.session_state["sidebar_open"]
-    st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
+if not st.session_state["sidebar_open"]:
+    st.markdown('<div class="filtri-toggle-btn">', unsafe_allow_html=True)
+    if st.button("☰ Filtri e Opzioni", key="sidebar_open_btn"):
+        st.session_state["sidebar_open"] = True
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(
     f'<div class="scanner-header"><h1>📡 MOMENTUM SETUP SCANNER</h1><p>Basato su regime_classifier v3.6.1 &nbsp;·&nbsp; EMA + TrendScore + MACD/RSI/Stoch/Volume + PSAR &nbsp;·&nbsp; <span class="{mkt_cls}">{mkt_label}</span></p></div>',
@@ -538,9 +539,6 @@ st.markdown(
 # ─────────────────────────────────────────────
 # SIDEBAR — visibilità cross-device
 # ─────────────────────────────────────────────
-_sidebar_open = st.session_state["sidebar_open"]
-_btn_left = "calc(21rem + 12px)" if _sidebar_open else "16px"
-
 _sidebar_css = """
     <style>
         section[data-testid="stSidebar"] {{
@@ -566,20 +564,16 @@ _sidebar_css = """
             background: #f0f2f6 !important;
         }}
         [data-testid="collapsedControl"] {{ display: none !important; }}
-        /* Sposta il pulsante a destra della sidebar quando è aperta */
-        .filtri-toggle-btn {{
-            left: {btn_left} !important;
-            right: auto !important;
-            transition: left 0.3s ease !important;
-        }}
     </style>
-""".format(
-    display="flex" if _sidebar_open else "none",
-    btn_left=_btn_left
-)
+""".format(display="flex" if st.session_state["sidebar_open"] else "none")
 st.markdown(_sidebar_css, unsafe_allow_html=True)
 
 with st.sidebar:
+    # Pulsante CHIUDI in cima alla sidebar — sempre visibile
+    if st.button("✕ Chiudi pannello", key="sidebar_close_btn"):
+        st.session_state["sidebar_open"] = False
+        st.rerun()
+    st.divider()
     st.markdown("### 🎛️ Ticker")
     selected_tickers = st.multiselect("Seleziona i titoli", options=list(ALL_TICKERS.keys()), default=list(ALL_TICKERS.keys()), format_func=lambda x: f"{x} — {ALL_TICKERS[x]}")
     ordine = st.selectbox("Ordinamento", ["Setup ON prima → Score", "Score decrescente", "Ticker A→Z"])
