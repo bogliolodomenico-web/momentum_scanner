@@ -243,14 +243,20 @@ hide_streamlit_style = """
     <div class="custom-open-container">
         <button class="custom-open-btn" onclick="
             try {
-                var btn = parent.document.querySelector('header[data-testid=\\'stHeader\\'] button[data-testid=\\ 'stSidebarCollapseButton\\ ']') || 
-                          document.querySelector('header[data-testid=\\'stHeader\\'] button[data-testid=\\ 'stSidebarCollapseButton\\ ']') ||
-                          parent.document.querySelector('button[data-testid=\\ 'stSidebarCollapseButton\\ ']') ||
-                          document.querySelector('button[data-testid=\\ 'stSidebarCollapseButton\\ ']');
-                if (btn) { 
-                    btn.click(); 
+                var btn = parent.document.querySelector('[data-testid=\\'stSidebarCollapseButton\\']') ||
+                          document.querySelector('[data-testid=\\'stSidebarCollapseButton\\']') ||
+                          parent.document.querySelector('button[kind=\\'header\\']') ||
+                          parent.document.querySelector('section[data-testid=\\'stSidebar\\'] + div button');
+                if (btn) {
+                    btn.click();
                 } else {
-                    console.log('Pulsante nativo non trovato');
+                    var sidebar = parent.document.querySelector('section[data-testid=\\'stSidebar\\']');
+                    if (sidebar) {
+                        var collapsed = sidebar.getAttribute('aria-expanded') === 'false' || sidebar.style.transform;
+                        sidebar.style.transform = collapsed ? 'none' : 'translateX(-100%)';
+                    } else {
+                        console.log('Sidebar non trovata');
+                    }
                 }
             } catch(e) {
                 console.error('Errore durante il click:', e);
