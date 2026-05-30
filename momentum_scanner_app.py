@@ -513,7 +513,7 @@ def render_ticker_card(ticker: str, nome: str, data: dict, changed: bool = False
 # ─────────────────────────────────────────────
 if "prev_signals"   not in st.session_state: st.session_state["prev_signals"]   = {}
 if "last_params"    not in st.session_state: st.session_state["last_params"]    = {}
-if "sidebar_open"   not in st.session_state: st.session_state["sidebar_open"]   = True
+if "sidebar_open"   not in st.session_state: st.session_state["sidebar_open"]   = False
 
 # ─────────────────────────────────────────────
 # HEADER + STATO MERCATO
