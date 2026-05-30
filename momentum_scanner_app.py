@@ -73,12 +73,9 @@ hide_streamlit_style = """
             pointer-events: none;
         }
         
-        /* Nascondiamo alla vista SOLO il pulsante nativo di riapertura dentro l'header, spostandolo fuori schermo */
+        /* Nasconde il pulsante nativo della sidebar */
         header[data-testid="stHeader"] button[data-testid="stSidebarCollapseButton"] {
-            opacity: 0 !important;
-            pointer-events: auto !important;
-            position: absolute !important;
-            left: -9999px !important;
+            display: none !important;
         }
         
         /* Forza il primo elemento della pagina a non avere margine superiore */
@@ -218,14 +215,9 @@ hide_streamlit_style = """
         .card-buy [style*="font-family:IBM Plex Mono"], 
         .card-sell [style*="font-family:IBM Plex Mono"] { color: #1a1a1a !important; }
 
-        /* ========== NUOVO PULSANTE PERSONALIZZATO IN ALTO A DESTRA ========== */
-        .custom-open-container {
-            position: fixed;
-            top: 14px;
-            right: 16px;
-            z-index: 999999 !important;
-        }
-        .custom-open-btn {
+        /* ========== PULSANTE FILTRI FISSO IN ALTO A DESTRA ========== */
+        div[data-testid="stFixedSidebarToggle"] > div > button,
+        .filtri-toggle-btn > button {
             background: #f5f5dc !important;
             color: #3a2a1f !important;
             border: 2px solid #c0a080 !important;
@@ -236,33 +228,18 @@ hide_streamlit_style = """
             font-family: 'DM Sans', sans-serif !important;
             cursor: pointer !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-            display: block !important;
+        }
+        /* Contenitore fixed per il pulsante Streamlit */
+        .filtri-toggle-btn {
+            position: fixed !important;
+            top: 10px !important;
+            right: 16px !important;
+            z-index: 999999 !important;
+        }
+        .filtri-toggle-btn > div {
+            position: static !important;
         }
     </style>
-
-    <div class="custom-open-container">
-        <button class="custom-open-btn" onclick="
-            try {
-                var btn = parent.document.querySelector('[data-testid=\\'stSidebarCollapseButton\\']') ||
-                          document.querySelector('[data-testid=\\'stSidebarCollapseButton\\']') ||
-                          parent.document.querySelector('button[kind=\\'header\\']') ||
-                          parent.document.querySelector('section[data-testid=\\'stSidebar\\'] + div button');
-                if (btn) {
-                    btn.click();
-                } else {
-                    var sidebar = parent.document.querySelector('section[data-testid=\\'stSidebar\\']');
-                    if (sidebar) {
-                        var collapsed = sidebar.getAttribute('aria-expanded') === 'false' || sidebar.style.transform;
-                        sidebar.style.transform = collapsed ? 'none' : 'translateX(-100%)';
-                    } else {
-                        console.log('Sidebar non trovata');
-                    }
-                }
-            } catch(e) {
-                console.error('Errore durante il click:', e);
-            }
-        ">☰ Filtri e Opzioni</button>
-    </div>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
@@ -527,14 +504,24 @@ def render_ticker_card(ticker: str, nome: str, data: dict, changed: bool = False
 # ─────────────────────────────────────────────
 # SESSION STATE
 # ─────────────────────────────────────────────
-if "prev_signals"  not in st.session_state: st.session_state["prev_signals"]  = {}
-if "last_params"   not in st.session_state: st.session_state["last_params"]   = {}
+if "prev_signals"   not in st.session_state: st.session_state["prev_signals"]   = {}
+if "last_params"    not in st.session_state: st.session_state["last_params"]    = {}
+if "sidebar_open"   not in st.session_state: st.session_state["sidebar_open"]   = True
 
 # ─────────────────────────────────────────────
 # HEADER + STATO MERCATO
 # ─────────────────────────────────────────────
 mkt_open, mkt_label = is_market_open()
 mkt_cls = "market-open" if mkt_open else "market-closed"
+
+# ─────────────────────────────────────────────
+# PULSANTE FISSO "FILTRI E OPZIONI" (in alto a destra)
+# ─────────────────────────────────────────────
+st.markdown('<div class="filtri-toggle-btn">', unsafe_allow_html=True)
+if st.button("☰ Filtri e Opzioni", key="sidebar_toggle"):
+    st.session_state["sidebar_open"] = not st.session_state["sidebar_open"]
+    st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 st.markdown(
     f'<div class="scanner-header"><h1>📡 MOMENTUM SETUP SCANNER</h1><p>Basato su regime_classifier v3.6.1 &nbsp;·&nbsp; EMA + TrendScore + MACD/RSI/Stoch/Volume + PSAR &nbsp;·&nbsp; <span class="{mkt_cls}">{mkt_label}</span></p></div>',
     unsafe_allow_html=True
@@ -543,6 +530,13 @@ st.markdown(
 # ─────────────────────────────────────────────
 # SIDEBAR
 # ─────────────────────────────────────────────
+if not st.session_state["sidebar_open"]:
+    st.markdown("""
+        <style>
+            section[data-testid="stSidebar"] { display: none !important; }
+        </style>
+    """, unsafe_allow_html=True)
+
 with st.sidebar:
     st.markdown("### 🎛️ Ticker")
     selected_tickers = st.multiselect("Seleziona i titoli", options=list(ALL_TICKERS.keys()), default=list(ALL_TICKERS.keys()), format_func=lambda x: f"{x} — {ALL_TICKERS[x]}")
