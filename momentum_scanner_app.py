@@ -546,7 +546,22 @@ _sidebar_css = """
             transform: none !important;
             visibility: visible !important;
             left: 0 !important;
-            position: relative !important;
+            position: fixed !important;
+            top: 0 !important;
+            height: 100vh !important;
+            width: 21rem !important;
+            min-width: 21rem !important;
+            max-width: 21rem !important;
+            background-color: #f0f2f6 !important;
+            background: #f0f2f6 !important;
+            z-index: 99999 !important;
+            overflow-y: auto !important;
+            box-shadow: 4px 0 16px rgba(0,0,0,0.2) !important;
+            padding: 1rem !important;
+        }}
+        section[data-testid="stSidebar"] > div:first-child {{
+            width: 100% !important;
+            background: #f0f2f6 !important;
         }}
         [data-testid="collapsedControl"] {{ display: none !important; }}
     </style>
