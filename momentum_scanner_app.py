@@ -239,6 +239,14 @@ hide_streamlit_style = """
         .filtri-toggle-btn > div {
             position: static !important;
         }
+        /* Su mobile: espande il contenuto principale quando la sidebar è chiusa */
+        @media (max-width: 768px) {
+            .main .block-container {
+                max-width: 100% !important;
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
@@ -522,20 +530,28 @@ if st.button("☰ Filtri e Opzioni", key="sidebar_toggle"):
     st.session_state["sidebar_open"] = not st.session_state["sidebar_open"]
     st.rerun()
 st.markdown('</div>', unsafe_allow_html=True)
+
 st.markdown(
     f'<div class="scanner-header"><h1>📡 MOMENTUM SETUP SCANNER</h1><p>Basato su regime_classifier v3.6.1 &nbsp;·&nbsp; EMA + TrendScore + MACD/RSI/Stoch/Volume + PSAR &nbsp;·&nbsp; <span class="{mkt_cls}">{mkt_label}</span></p></div>',
     unsafe_allow_html=True
 )
 
 # ─────────────────────────────────────────────
-# SIDEBAR
+# SIDEBAR — visibilità cross-device
 # ─────────────────────────────────────────────
-if not st.session_state["sidebar_open"]:
-    st.markdown("""
-        <style>
-            section[data-testid="stSidebar"] { display: none !important; }
-        </style>
-    """, unsafe_allow_html=True)
+_sidebar_css = """
+    <style>
+        section[data-testid="stSidebar"] {{
+            display: {display} !important;
+            transform: none !important;
+            visibility: visible !important;
+            left: 0 !important;
+            position: relative !important;
+        }}
+        [data-testid="collapsedControl"] {{ display: none !important; }}
+    </style>
+""".format(display="flex" if st.session_state["sidebar_open"] else "none")
+st.markdown(_sidebar_css, unsafe_allow_html=True)
 
 with st.sidebar:
     st.markdown("### 🎛️ Ticker")
